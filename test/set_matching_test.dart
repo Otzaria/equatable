@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+// Identity-Set tests require fresh, noncanonical object instances.
 import 'package:equatable/equatable.dart';
 import 'package:equatable/src/equatable_utils.dart';
 import 'package:meta/meta.dart';
@@ -120,21 +122,21 @@ void main() {
       final left = <Object>{
         {
           'a': [1, 2],
-          'b': 3
+          'b': 3,
         },
         <Object>{
           [4],
-          [5]
+          [5],
         },
       };
       final right = <Object>{
         <Object>{
           [5],
-          [4]
+          [4],
         },
         {
           'b': 3,
-          'a': [1, 2]
+          'a': [1, 2],
         },
       };
       expect(setEquals(left, right), isTrue);
