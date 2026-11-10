@@ -46,7 +46,9 @@ bool setEquals(Set<Object?> a, Set<Object?> b) {
   // Every element must match a *different* element of the other Set.
   final unmatched = b.toList();
   for (final element in a) {
-    final index = unmatched.indexWhere((value) => objectsEquals(element, value));
+    final index = unmatched.indexWhere(
+      (value) => objectsEquals(element, value),
+    );
     if (index == -1) return false;
     // Order is irrelevant; swap with the last candidate to remove in O(1).
     unmatched[index] = unmatched.last;
