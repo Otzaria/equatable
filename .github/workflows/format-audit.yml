@@ -25,3 +25,51 @@ jobs:
           echo '====== FORMAT PATCH BEGIN ======'
           git diff --no-ext-diff -- lib test benchmarks
           echo '====== FORMAT PATCH END ======'
+  aot-benchmark-comparison:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Compare master against integration with identical AOT benchmarks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/equatable-baseline origin/master
+          cp benchmarks/main.dart /tmp/equatable-baseline/benchmarks/main.dart
+          cp benchmarks/pubspec.yaml /tmp/equatable-baseline/benchmarks/pubspec.yaml
+          cp benchmarks/pubspec_overrides.yaml /tmp/equatable-baseline/benchmarks/pubspec_overrides.yaml
+          (cd /tmp/equatable-baseline/benchmarks && dart pub get && dart compile exe main.dart -o benchmark_aot && ./benchmark_aot > /tmp/equatable-base.txt)
+          (cd benchmarks && dart pub get && dart compile exe main.dart -o benchmark_aot && ./benchmark_aot > /tmp/equatable-new.txt)
+          python3 - <<'PY'
+          import math
+          def values(path):
+              results = {}
+              title = None
+              for line in open(path, encoding='utf-8'):
+                  if line.strip() and not line[0].isspace():
+                      title = line.strip()
+                  if title and 'units/second:' in line:
+                      raw = line.split('units/second:', 1)[1].strip().replace(' ', '')
+                      try:
+                          results[title] = float(raw)
+                      except ValueError:
+                          pass
+              return results
+          baseline = values('/tmp/equatable-base.txt')
+          candidate = values('/tmp/equatable-new.txt')
+          print('AOT benchmark comparison: master -> integration, units/sec (higher is better)')
+          for name, old in baseline.items():
+              new = candidate.get(name)
+              if new is None:
+                  print(f'{name}: candidate output missing')
+              elif old > 0 and math.isfinite(old) and math.isfinite(new):
+                  print(f'{name}: {old:,.0f} -> {new:,.0f} (x{new/old:.2f})')
+              else:
+                  print(f'{name}: {old} -> {new}')
+          if not baseline or len(baseline) != len(candidate):
+              raise SystemExit('Benchmark output incomplete')
+          PY
