@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:equatable/equatable.dart';
 import 'package:equatable/src/equatable_utils.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 class _Box extends Equatable {
@@ -13,6 +14,7 @@ class _Box extends Equatable {
   List<Object?> get props => [value];
 }
 
+@immutable
 class _CollidingKey {
   const _CollidingKey(this.id);
 
@@ -26,6 +28,7 @@ class _CollidingKey {
   int get hashCode => 1;
 }
 
+@immutable
 class _CollidingIterable extends IterableBase<int> {
   _CollidingIterable(this.values);
 
@@ -33,6 +36,9 @@ class _CollidingIterable extends IterableBase<int> {
 
   @override
   Iterator<int> get iterator => values.iterator;
+
+  @override
+  bool operator ==(Object other) => identical(this, other);
 
   @override
   int get hashCode => 7;
@@ -51,6 +57,7 @@ class _FlaggedIterable extends IterableBase<int> with Equatable {
   List<Object?> get props => [flag];
 }
 
+@immutable
 class _NativeEqualityIterable extends IterableBase<int> {
   _NativeEqualityIterable(this.key, this.values);
 
@@ -68,11 +75,13 @@ class _NativeEqualityIterable extends IterableBase<int> {
   int get hashCode => key.hashCode;
 }
 
+@immutable
 class _PermissiveValue {
   const _PermissiveValue();
 
   @override
-  bool operator ==(Object other) => true;
+  bool operator ==(Object other) =>
+      other is _Box || other is _PermissiveValue;
 
   @override
   int get hashCode => 0;
