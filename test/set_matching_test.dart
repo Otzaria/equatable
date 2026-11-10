@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 // Identity-Set tests require fresh, noncanonical object instances.
+import 'dart:collection';
+
 import 'package:equatable/equatable.dart';
 import 'package:equatable/src/equatable_utils.dart';
 import 'package:meta/meta.dart';
@@ -89,6 +91,30 @@ void main() {
 
       expect(setEquals(left, right), isFalse);
       expect(setEquals(right, left), isFalse);
+    });
+
+    test('does not accept matches from a broader custom comparator', () {
+      final left = <String>{'a', 'b'};
+      final right = SplayTreeSet<String>(
+        (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+      )..addAll(['A', 'B']);
+
+      expect(setEquals(left, right), isFalse);
+      expect(setEquals(right, left), isFalse);
+    });
+
+    test('falls back when a narrower comparator rejects equal values', () {
+      final left = <num>{1, 2};
+      final right = SplayTreeSet<num>((a, b) {
+        final byValue = a.compareTo(b);
+        return byValue != 0
+            ? byValue
+            : a.runtimeType.toString().compareTo(b.runtimeType.toString());
+      })
+        ..addAll([1.0, 2.0]);
+
+      expect(setEquals(left, right), isTrue);
+      expect(setEquals(right, left), isTrue);
     });
 
     test('does not match the same structural list twice', () {

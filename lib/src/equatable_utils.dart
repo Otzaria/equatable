@@ -56,9 +56,8 @@ bool setEquals(Set<Object?> a, Set<Object?> b) {
   if (identical(a, b)) return true;
   if (a.length != b.length) return false;
 
-  // Native hash lookup avoids the quadratic scan for ordinary sets.
-  // Set.identity and custom Set equality can disagree with objectsEquals,
-  // so every candidate must be checked. Each candidate may match only once.
+  // Custom Set equality can disagree with objectsEquals; validate each
+  // native match and use it only once.
   if (!_requiresDeepMatching(a) && !_requiresDeepMatching(b)) {
     final used = Set<Object?>.identity();
     var allMatched = true;
