@@ -55,7 +55,9 @@ bool objectsEquals(Object? a, Object? b) {
   if (identical(a, b)) return true;
   // Equatable's own == must take precedence even when a subtype is
   // iterable. Comparing it structurally would ignore its custom props.
-  if (a is Equatable || b is Equatable) return a == b;
+  if (a is Equatable || b is Equatable) {
+    return a is Equatable && b is Equatable && a == b;
+  }
   // Sets are unordered: never compare a Set as an ordered Iterable.
   if (a is Set<Object?> || b is Set<Object?>) {
     return a is Set<Object?> &&
