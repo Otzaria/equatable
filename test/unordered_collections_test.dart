@@ -38,7 +38,8 @@ class _CollidingIterable extends IterableBase<int> {
   Iterator<int> get iterator => values.iterator;
 
   @override
-  bool operator ==(Object other) => identical(this, other);
+  bool operator ==(Object other) =>
+      other is _CollidingIterable && identical(this, other);
 
   @override
   int get hashCode => 7;
