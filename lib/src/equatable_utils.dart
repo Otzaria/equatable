@@ -70,7 +70,9 @@ bool setEquals(Set<Object?> a, Set<Object?> b) {
 
 bool _requiresDeepMatching(Set<Object?> values) {
   for (final value in values) {
-    if (value is Iterable || value is Map) return true;
+    if (value is Iterable<Object?> || value is Map<Object?, Object?>) {
+      return true;
+    }
   }
   return false;
 }
