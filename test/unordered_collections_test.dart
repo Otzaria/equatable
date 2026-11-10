@@ -1,0 +1,173 @@
+import 'dart:collection';
+
+import 'package:equatable/equatable.dart';
+import 'package:equatable/src/equatable_utils.dart';
+import 'package:test/test.dart';
+
+class _Box extends Equatable {
+  const _Box(this.value);
+
+  final Object? value;
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class _CollidingKey {
+  const _CollidingKey(this.id);
+
+  final int id;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _CollidingKey && other.id == id;
+
+  @override
+  int get hashCode => 1;
+}
+
+class _CollidingIterable extends IterableBase<int> {
+  _CollidingIterable(this.values);
+
+  final List<int> values;
+
+  @override
+  Iterator<int> get iterator => values.iterator;
+
+  @override
+  int get hashCode => 7;
+}
+
+class _FlaggedIterable extends IterableBase<int> with Equatable {
+  _FlaggedIterable(this.flag, this.values);
+
+  final bool flag;
+  final List<int> values;
+
+  @override
+  Iterator<int> get iterator => values.iterator;
+
+  @override
+  List<Object?> get props => [flag];
+}
+
+class _NativeEqualityIterable extends IterableBase<int> {
+  _NativeEqualityIterable(this.key, this.values);
+
+  final int key;
+  final List<int> values;
+
+  @override
+  Iterator<int> get iterator => values.iterator;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _NativeEqualityIterable && other.key == key;
+
+  @override
+  int get hashCode => key.hashCode;
+}
+
+void main() {
+  group('unordered collection hashing', () {
+    test('maps with colliding key hashes are insertion-order independent', () {
+      final left = _Box({
+        const _CollidingKey(1): 'first',
+        const _CollidingKey(2): 'second',
+      });
+      final right = _Box({
+        const _CollidingKey(2): 'second',
+        const _CollidingKey(1): 'first',
+      });
+
+      expect(left, right);
+      expect(left.hashCode, right.hashCode);
+    });
+
+    test('sets of structurally equal iterables hash identically', () {
+      final left = _Box(<Object>{
+        _CollidingIterable([1, 2]),
+        _CollidingIterable([3, 4]),
+      });
+      final right = _Box(<Object>{
+        _CollidingIterable([3, 4]),
+        _CollidingIterable([1, 2]),
+      });
+
+      expect(left, right);
+      expect(left.hashCode, right.hashCode);
+    });
+
+    test('nested maps and sets preserve equality/hash consistency', () {
+      final left = _Box({
+        'a': <Object>{
+          [1, 2],
+          [3, 4],
+        },
+        'b': {
+          'x': [5, 6],
+        },
+      });
+      final right = _Box({
+        'b': {
+          'x': [5, 6],
+        },
+        'a': <Object>{
+          [3, 4],
+          [1, 2],
+        },
+      });
+
+      expect(left, right);
+      expect(left.hashCode, right.hashCode);
+    });
+
+    test('native-equal map keys use their native hash, not iterable data', () {
+      final left = _Box({
+        _NativeEqualityIterable(1, [10]): 'value',
+      });
+      final right = _Box({
+        _NativeEqualityIterable(1, [20]): 'value',
+      });
+
+      expect(left, right);
+      expect(left.hashCode, right.hashCode);
+    });
+
+    test('different map values do not compare equal', () {
+      expect(
+        _Box({const _CollidingKey(1): 'first'}),
+        isNot(_Box({const _CollidingKey(1): 'second'})),
+      );
+    });
+  });
+
+  group('collection kind and Equatable precedence', () {
+    test('set is not equal to ordered list even with the same elements', () {
+      expect(objectsEquals(<int>{1, 2}, <int>[1, 2]), isFalse);
+      expect(objectsEquals(<int>[1, 2], <int>{1, 2}), isFalse);
+    });
+
+    test('Equatable iterable honors props, not only iterator values', () {
+      final first = _FlaggedIterable(true, [1, 2]);
+      final second = _FlaggedIterable(false, [1, 2]);
+
+      expect(objectsEquals(first, second), isFalse);
+      expect(_Box(first), isNot(_Box(second)));
+    });
+
+    test('Equatable iterable vs plain iterable is not structurally equal', () {
+      final wrapped = _FlaggedIterable(true, [1, 2]);
+      expect(objectsEquals(wrapped, [1, 2]), isFalse);
+      expect(objectsEquals([1, 2], wrapped), isFalse);
+    });
+
+    test('Equatable iterables with equal props get equal wrapper hashes', () {
+      final first = _FlaggedIterable(true, [1, 2]);
+      final second = _FlaggedIterable(true, [9, 9]);
+      expect(first, second);
+      expect(_Box(first), _Box(second));
+      expect(_Box(first).hashCode, _Box(second).hashCode);
+    });
+  });
+}
