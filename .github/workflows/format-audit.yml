@@ -1,0 +1,25 @@
+name: Temporary Dart formatting audit
+
+on:
+  push:
+    branches:
+      - integration/equatable-20261110-performance-qa
+
+permissions:
+  contents: read
+
+jobs:
+  formatting-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Show exact dart format changes
+        shell: bash
+        run: |
+          dart format .
+          echo '====== FORMAT PATCH BEGIN ======'
+          git diff --no-ext-diff -- lib test benchmarks
+          echo '====== FORMAT PATCH END ======'
