@@ -57,13 +57,15 @@ void main() {
 
     test('preserves value equality for identity-based sets', () {
       final left = <_MeasuredValue>{
-        const _MeasuredValue(1),
-        const _MeasuredValue(2),
+        _MeasuredValue(1),
+        _MeasuredValue(2),
       };
+      // Distinct non-const instances make identity lookup miss, exercising
+      // the required structural fallback.
       final right = Set<_MeasuredValue>.identity()
         ..addAll([
-          const _MeasuredValue(2),
-          const _MeasuredValue(1),
+          _MeasuredValue(2),
+          _MeasuredValue(1),
         ]);
 
       expect(setEquals(left, right), isTrue);
