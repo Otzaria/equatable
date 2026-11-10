@@ -18,6 +18,18 @@ class _ObservedValue {
   }
 }
 
+class _MutatingValue {
+  _MutatingValue(this.values);
+
+  final List<Object?> values;
+
+  @override
+  String toString() {
+    values.removeLast();
+    return 'changed';
+  }
+}
+
 class _SingleTraversal extends IterableBase<Object?> {
   _SingleTraversal(this.values);
 
@@ -52,13 +64,13 @@ void main() {
       final left = <Object?>[
         [1, 2, 3],
         {
-          'a': [4, 5]
+          'a': [4, 5],
         },
       ];
       final right = <Object?>[
         [1, 2, 3],
         {
-          'a': [4, 5]
+          'a': [4, 5],
         },
       ];
       expect(mapPropsToHashCode(left), mapPropsToHashCode(right));
@@ -72,7 +84,7 @@ void main() {
           1,
           null,
           'abc',
-          [2, 3]
+          [2, 3],
         ]),
         '_StringifiedProps(1, null, abc, [2, 3])',
       );
@@ -98,6 +110,16 @@ void main() {
       expect(result.startsWith('_StringifiedProps(0, 1, 2, '), isTrue);
       expect(result.endsWith(', 1999)'), isTrue);
       expect(result.split(', ').length, 2000);
+    });
+
+    test('retains concurrent modification detection during toString', () {
+      final values = <Object?>[];
+      values.addAll([_MutatingValue(values), 'last']);
+
+      expect(
+        () => mapPropsToString(_StringifiedProps, values),
+        throwsConcurrentModificationError,
+      );
     });
   });
 }
