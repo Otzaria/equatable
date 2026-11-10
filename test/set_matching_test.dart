@@ -55,6 +55,36 @@ void main() {
       expect(_MeasuredValue.comparisons, lessThan(1000));
     });
 
+    test('preserves value equality for identity-based sets', () {
+      final left = <_MeasuredValue>{
+        const _MeasuredValue(1),
+        const _MeasuredValue(2),
+      };
+      final right = Set<_MeasuredValue>.identity()
+        ..addAll([
+          const _MeasuredValue(2),
+          const _MeasuredValue(1),
+        ]);
+
+      expect(setEquals(left, right), isTrue);
+      expect(setEquals(right, left), isTrue);
+    });
+
+    test('does not reuse a native-lookup match from an identity set', () {
+      final left = Set<_MeasuredValue>.identity()
+        ..addAll([
+          _MeasuredValue(1),
+          _MeasuredValue(1),
+        ]);
+      final right = <_MeasuredValue>{
+        _MeasuredValue(1),
+        _MeasuredValue(2),
+      };
+
+      expect(setEquals(left, right), isFalse);
+      expect(setEquals(right, left), isFalse);
+    });
+
     test('does not match the same structural list twice', () {
       final left = <Object>{
         [1],
