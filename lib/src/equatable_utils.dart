@@ -35,15 +35,26 @@ bool setEquals(Set<Object?> a, Set<Object?> b) {
   if (identical(a, b)) return true;
   if (a.length != b.length) return false;
 
-  // For ordinary values, native Set.contains provides near-linear equality
-  // without allocations. Nested collections need structural comparisons:
-  // List/Map/Set hashCode normally uses identity, not deep equality.
+  // Native hash lookup avoids the quadratic scan for ordinary sets.
+  // Set.identity and custom Set equality can disagree with objectsEquals,
+  // so every candidate must be checked. Each candidate may match only once.
   if (!_requiresDeepMatching(a) && !_requiresDeepMatching(b)) {
-    return a.every(b.contains);
+    final used = Set<Object?>.identity();
+    var allMatched = true;
+    for (final element in a) {
+      final match = b.lookup(element);
+      if ((match == null && !b.contains(element)) ||
+          !objectsEquals(element, match) ||
+          !used.add(match)) {
+        allMatched = false;
+        break;
+      }
+    }
+    if (allMatched) return true;
   }
 
-  // A Set may contain multiple distinct lists with identical contents.
-  // Every element must match a *different* element of the other Set.
+  // Deep equality can match distinct objects with different native hashes.
+  // Use one-to-one matching when the native fast path cannot prove equality.
   final unmatched = b.toList();
   for (final element in a) {
     final index = unmatched.indexWhere(
