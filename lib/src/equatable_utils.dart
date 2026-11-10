@@ -22,9 +22,7 @@ bool iterableEquals(Iterable<Object?> a, Iterable<Object?> b) {
   // Sets implement Iterable but must compare independent of iteration order.
   // Comparing a Set with an ordered sequence is never value equality.
   if (a is Set<Object?> || b is Set<Object?>) {
-    return a is Set<Object?> &&
-        b is Set<Object?> &&
-        setEquals(a, b);
+    return a is Set<Object?> && b is Set<Object?> && setEquals(a, b);
   }
   if (a.length != b.length) return false;
   for (var i = 0; i < a.length; i++) {
