@@ -34,10 +34,32 @@ bool iterableEquals(Iterable<Object?> a, Iterable<Object?> b) {
 bool setEquals(Set<Object?> a, Set<Object?> b) {
   if (identical(a, b)) return true;
   if (a.length != b.length) return false;
+
+  // For ordinary values, native Set.contains provides near-linear equality
+  // without allocations. Nested collections need structural comparisons:
+  // List/Map/Set hashCode normally uses identity, not deep equality.
+  if (!_requiresDeepMatching(a) && !_requiresDeepMatching(b)) {
+    return a.every(b.contains);
+  }
+
+  // A Set may contain multiple distinct lists with identical contents.
+  // Every element must match a *different* element of the other Set.
+  final unmatched = b.toList();
   for (final element in a) {
-    if (!b.any((e) => objectsEquals(element, e))) return false;
+    final index = unmatched.indexWhere((value) => objectsEquals(element, value));
+    if (index == -1) return false;
+    // Order is irrelevant; swap with the last candidate to remove in O(1).
+    unmatched[index] = unmatched.last;
+    unmatched.removeLast();
   }
   return true;
+}
+
+bool _requiresDeepMatching(Set<Object?> values) {
+  for (final value in values) {
+    if (value is Iterable || value is Map) return true;
+  }
+  return false;
 }
 
 /// Determines whether two maps are equal.
