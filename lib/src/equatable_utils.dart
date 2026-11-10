@@ -3,7 +3,14 @@ import 'package:equatable/equatable.dart';
 
 /// Returns a `hashCode` for [props].
 int mapPropsToHashCode(Iterable<Object?>? props) {
-  return _finish(props == null ? 0 : props.fold(0, _combine));
+  var hash = 0;
+  if (props != null) {
+    // Avoid the generic fold callback on this hot path.
+    for (final prop in props) {
+      hash = _combine(hash, prop);
+    }
+  }
+  return _finish(hash);
 }
 
 /// Determines whether two lists ([a] and [b]) are equal.
@@ -105,5 +112,11 @@ int _finish(int hash) {
 
 /// Returns a string for [props].
 String mapPropsToString(Type runtimeType, List<Object?> props) {
-  return '$runtimeType(${props.map((prop) => prop.toString()).join(', ')})';
+  final buffer = StringBuffer()..write(runtimeType)..write('(');
+  for (var index = 0; index < props.length; index++) {
+    if (index != 0) buffer.write(', ');
+    buffer.write(props[index]);
+  }
+  buffer.write(')');
+  return buffer.toString();
 }
