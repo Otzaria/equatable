@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:equatable/src/equatable_utils.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
+@immutable
 class _MeasuredValue {
   const _MeasuredValue(this.value);
 
