@@ -1,3 +1,7 @@
+// Distinct fixtures exercise deep equality instead of identity.
+// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables
+
 import 'dart:collection';
 
 import 'package:equatable/equatable.dart';
@@ -29,7 +33,7 @@ class _CollidingKey {
 
 @immutable
 class _CollidingIterable extends IterableBase<int> {
-  _CollidingIterable(this.values);
+  const _CollidingIterable(this.values);
 
   final List<int> values;
 
@@ -45,7 +49,7 @@ class _CollidingIterable extends IterableBase<int> {
 }
 
 class _FlaggedIterable extends IterableBase<int> with Equatable {
-  _FlaggedIterable(this.flag, this.values);
+  _FlaggedIterable(this.values, {required this.flag});
 
   final bool flag;
   final List<int> values;
@@ -59,7 +63,7 @@ class _FlaggedIterable extends IterableBase<int> with Equatable {
 
 @immutable
 class _NativeEqualityIterable extends IterableBase<int> {
-  _NativeEqualityIterable(this.key, this.values);
+  const _NativeEqualityIterable(this.key, this.values);
 
   final int key;
   final List<int> values;
@@ -202,22 +206,22 @@ void main() {
     });
 
     test('Equatable iterable honors props, not only iterator values', () {
-      final first = _FlaggedIterable(true, [1, 2]);
-      final second = _FlaggedIterable(false, [1, 2]);
+      final first = _FlaggedIterable([1, 2], flag: true);
+      final second = _FlaggedIterable([1, 2], flag: false);
 
       expect(objectsEquals(first, second), isFalse);
       expect(_Box(first), isNot(_Box(second)));
     });
 
     test('Equatable iterable vs plain iterable is not structurally equal', () {
-      final wrapped = _FlaggedIterable(true, [1, 2]);
+      final wrapped = _FlaggedIterable([1, 2], flag: true);
       expect(objectsEquals(wrapped, [1, 2]), isFalse);
       expect(objectsEquals([1, 2], wrapped), isFalse);
     });
 
     test('Equatable iterables with equal props get equal wrapper hashes', () {
-      final first = _FlaggedIterable(true, [1, 2]);
-      final second = _FlaggedIterable(true, [9, 9]);
+      final first = _FlaggedIterable([1, 2], flag: true);
+      final second = _FlaggedIterable([9, 9], flag: true);
       expect(first, second);
       expect(_Box(first), _Box(second));
       expect(_Box(first).hashCode, _Box(second).hashCode);
