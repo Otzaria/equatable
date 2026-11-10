@@ -57,11 +57,17 @@ bool objectsEquals(Object? a, Object? b) {
   // iterable. Comparing it structurally would ignore its custom props.
   if (a is Equatable || b is Equatable) return a == b;
   // Sets are unordered: never compare a Set as an ordered Iterable.
-  if (a is Set || b is Set) {
-    return a is Set && b is Set && setEquals(a, b);
+  if (a is Set<Object?> || b is Set<Object?>) {
+    return a is Set<Object?> &&
+        b is Set<Object?> &&
+        setEquals(a, b);
   }
-  if (a is Iterable && b is Iterable) return iterableEquals(a, b);
-  if (a is Map && b is Map) return mapEquals(a, b);
+  if (a is Iterable<Object?> && b is Iterable<Object?>) {
+    return iterableEquals(a, b);
+  }
+  if (a is Map<Object?, Object?> && b is Map<Object?, Object?>) {
+    return mapEquals(a, b);
+  }
   return a == b;
 }
 
