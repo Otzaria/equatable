@@ -68,7 +68,27 @@ class _NativeEqualityIterable extends IterableBase<int> {
   int get hashCode => key.hashCode;
 }
 
+class _PermissiveValue {
+  const _PermissiveValue();
+
+  @override
+  bool operator ==(Object other) => true;
+
+  @override
+  int get hashCode => 0;
+}
+
 void main() {
+  test('Equatable vs non-Equatable is false in both directions', () {
+    final equatable = _Box('value');
+    const other = _PermissiveValue();
+
+    expect(objectsEquals(equatable, other), isFalse);
+    expect(objectsEquals(other, equatable), isFalse);
+    expect(_Box(equatable), isNot(_Box(other)));
+    expect(_Box(other), isNot(_Box(equatable)));
+  });
+
   group('unordered collection hashing', () {
     test('maps with colliding key hashes are insertion-order independent', () {
       final left = _Box({
