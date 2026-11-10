@@ -118,12 +118,24 @@ void main() {
 
     test('compares nested sets and maps regardless of insertion order', () {
       final left = <Object>{
-        {'a': [1, 2], 'b': 3},
-        <Object>{[4], [5]},
+        {
+          'a': [1, 2],
+          'b': 3
+        },
+        <Object>{
+          [4],
+          [5]
+        },
       };
       final right = <Object>{
-        <Object>{[5], [4]},
-        {'b': 3, 'a': [1, 2]},
+        <Object>{
+          [5],
+          [4]
+        },
+        {
+          'b': 3,
+          'a': [1, 2]
+        },
       };
       expect(setEquals(left, right), isTrue);
       expect(setEquals(right, left), isTrue);
