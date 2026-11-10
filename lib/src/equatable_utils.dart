@@ -144,7 +144,7 @@ int _combine(int hash, Object? object) {
   if (object is Equatable) {
     return _combine(hash, object.hashCode);
   }
-  if (object is Map) {
+  if (object is Map<Object?, Object?>) {
     var unorderedHash = 0;
     for (final entry in object.entries) {
       // Map keys are compared by native ==/hashCode (containsKey), unlike
@@ -156,7 +156,7 @@ int _combine(int hash, Object? object) {
     }
     return _combine(hash, unorderedHash ^ object.length);
   }
-  if (object is Set) {
+  if (object is Set<Object?>) {
     var unorderedHash = 0;
     for (final element in object) {
       unorderedHash =
@@ -164,7 +164,7 @@ int _combine(int hash, Object? object) {
     }
     return _combine(hash, unorderedHash ^ object.length);
   }
-  if (object is Iterable) {
+  if (object is Iterable<Object?>) {
     var length = 0;
     for (final value in object) {
       hash = hash ^ _combine(hash, value);
