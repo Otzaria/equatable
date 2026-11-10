@@ -60,9 +60,7 @@ bool objectsEquals(Object? a, Object? b) {
   }
   // Sets are unordered: never compare a Set as an ordered Iterable.
   if (a is Set<Object?> || b is Set<Object?>) {
-    return a is Set<Object?> &&
-        b is Set<Object?> &&
-        setEquals(a, b);
+    return a is Set<Object?> && b is Set<Object?> && setEquals(a, b);
   }
   if (a is Iterable<Object?> && b is Iterable<Object?>) {
     return iterableEquals(a, b);
