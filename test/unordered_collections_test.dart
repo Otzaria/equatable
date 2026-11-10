@@ -104,6 +104,31 @@ void main() {
       expect(left.hashCode, right.hashCode);
     });
 
+    test('all insertion-order rotations keep deep Map hashes identical', () {
+      final reference = _Box(<_CollidingKey, List<int>>{
+        for (var i = 0; i < 6; i++) _CollidingKey(i): [i, i + 1],
+      });
+
+      for (var rotation = 0; rotation < 6; rotation++) {
+        final values = <_CollidingKey, List<int>>{};
+        for (var offset = 0; offset < 6; offset++) {
+          final key = (rotation + offset) % 6;
+          values[_CollidingKey(key)] = [key, key + 1];
+        }
+        final candidate = _Box(values);
+        expect(candidate, reference);
+        expect(candidate.hashCode, reference.hashCode);
+      }
+    });
+
+    test('records containing equal num values retain hash consistency', () {
+      final integer = _Box((value: 1, label: 'record'));
+      final decimal = _Box((value: 1.0, label: 'record'));
+
+      expect(integer, decimal);
+      expect(integer.hashCode, decimal.hashCode);
+    });
+
     test('sets of structurally equal iterables hash identically', () {
       final left = _Box(<Object>{
         _CollidingIterable([1, 2]),
