@@ -112,7 +112,9 @@ int _finish(int hash) {
 
 /// Returns a string for [props].
 String mapPropsToString(Type runtimeType, List<Object?> props) {
-  final buffer = StringBuffer()..write(runtimeType)..write('(');
+  final buffer = StringBuffer()
+    ..write(runtimeType)
+    ..write('(');
   for (var index = 0; index < props.length; index++) {
     if (index != 0) buffer.write(', ');
     buffer.write(props[index]);
