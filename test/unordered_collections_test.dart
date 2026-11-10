@@ -21,8 +21,7 @@ class _CollidingKey {
   final int id;
 
   @override
-  bool operator ==(Object other) =>
-      other is _CollidingKey && other.id == id;
+  bool operator ==(Object other) => other is _CollidingKey && other.id == id;
 
   @override
   int get hashCode => 1;
@@ -81,8 +80,7 @@ class _PermissiveValue {
   const _PermissiveValue();
 
   @override
-  bool operator ==(Object other) =>
-      other is _Box || other is _PermissiveValue;
+  bool operator ==(Object other) => other is _Box || other is _PermissiveValue;
 
   @override
   int get hashCode => 0;

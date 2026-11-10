@@ -29,8 +29,20 @@ void main() {
     });
 
     test('nested mixed sets and lists return false, not an assertion', () {
-      expect(objectsEquals([<int>{1, 2}], [[1, 2]]), isFalse);
-      expect(objectsEquals([[1, 2]], [<int>{1, 2}]), isFalse);
+      expect(
+          objectsEquals([
+            <int>{1, 2}
+          ], [
+            [1, 2]
+          ]),
+          isFalse);
+      expect(
+          objectsEquals([
+            [1, 2]
+          ], [
+            <int>{1, 2}
+          ]),
+          isFalse);
     });
 
     test('retains ordered equality between lists and lazy iterables', () {

@@ -28,9 +28,7 @@ bool iterableEquals(Iterable<Object?> a, Iterable<Object?> b) {
   // Sets implement Iterable but must compare independent of iteration order.
   // Comparing a Set with an ordered sequence is never value equality.
   if (a is Set<Object?> || b is Set<Object?>) {
-    return a is Set<Object?> &&
-        b is Set<Object?> &&
-        setEquals(a, b);
+    return a is Set<Object?> && b is Set<Object?> && setEquals(a, b);
   }
   // Keep indexed access for lists, but avoid repeated elementAt(i) traversals
   // (and repeated length computation) on other Iterable implementations.
@@ -127,9 +125,7 @@ bool objectsEquals(Object? a, Object? b) {
   }
   // Sets are unordered: never compare a Set as an ordered Iterable.
   if (a is Set<Object?> || b is Set<Object?>) {
-    return a is Set<Object?> &&
-        b is Set<Object?> &&
-        setEquals(a, b);
+    return a is Set<Object?> && b is Set<Object?> && setEquals(a, b);
   }
   if (a is Iterable<Object?> && b is Iterable<Object?>) {
     return iterableEquals(a, b);
@@ -190,7 +186,9 @@ int _finish(int hash) {
 
 /// Returns a string for [props].
 String mapPropsToString(Type runtimeType, List<Object?> props) {
-  final buffer = StringBuffer()..write(runtimeType)..write('(');
+  final buffer = StringBuffer()
+    ..write(runtimeType)
+    ..write('(');
   for (var index = 0; index < props.length; index++) {
     if (index != 0) buffer.write(', ');
     buffer.write(props[index]);
