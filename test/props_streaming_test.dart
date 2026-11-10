@@ -51,11 +51,15 @@ void main() {
     test('preserves nested list and map hashing', () {
       final left = <Object?>[
         [1, 2, 3],
-        {'a': [4, 5]},
+        {
+          'a': [4, 5]
+        },
       ];
       final right = <Object?>[
         [1, 2, 3],
-        {'a': [4, 5]},
+        {
+          'a': [4, 5]
+        },
       ];
       expect(mapPropsToHashCode(left), mapPropsToHashCode(right));
     });
@@ -64,7 +68,12 @@ void main() {
   group('props stringify', () {
     test('preserves exact spacing, null and nested collection output', () {
       expect(
-        mapPropsToString(_StringifiedProps, [1, null, 'abc', [2, 3]]),
+        mapPropsToString(_StringifiedProps, [
+          1,
+          null,
+          'abc',
+          [2, 3]
+        ]),
         '_StringifiedProps(1, null, abc, [2, 3])',
       );
       expect(mapPropsToString(_StringifiedProps, []), '_StringifiedProps()');
